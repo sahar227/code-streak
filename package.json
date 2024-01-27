@@ -1,0 +1,26 @@
+{
+  "name": "code-streak",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "src/packages/*",
+    "src/apps/*"
+  ],
+  "scripts": {
+    "web": "npm run dev --workspace=web",
+    "mobile": "npm run dev --workspace=mobile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sahar227/code-streak.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sahar227/code-streak/issues"
+  },
+  "homepage": "https://github.com/sahar227/code-streak#readme"
+}
