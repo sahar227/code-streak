@@ -9,6 +9,7 @@
     "lint": "next lint",
     "migration:generate": "drizzle-kit generate:mysql",
     "migration:run": "ts-node --skip-project db/migrate.ts",
+    "migration:drop": "drizzle-kit drop",
     "db:view": "drizzle-kit studio"
   },
   "dependencies": {
