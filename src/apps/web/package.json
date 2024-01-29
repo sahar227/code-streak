@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "migration:generate": "drizzle-kit generate:mysql",
-    "migration:run": "ts-node --skip-project db/migrate.ts"
+    "migration:run": "ts-node --skip-project db/migrate.ts",
+    "db:view": "drizzle-kit studio"
   },
   "dependencies": {
     "drizzle-orm": "^0.29.3",
