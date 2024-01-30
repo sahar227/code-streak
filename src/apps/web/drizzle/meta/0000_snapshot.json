@@ -1,11 +1,11 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "16990372-071f-490b-91c6-84a53ef8e9fc",
+  "id": "f80c3db4-6a09-4869-a15c-a8405279e562",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "cities": {
-      "name": "cities",
+    "user_daily_progress": {
+      "name": "user_daily_progress",
       "columns": {
         "id": {
           "name": "id",
@@ -14,33 +14,51 @@
           "notNull": true,
           "autoincrement": true
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(256)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "country_id": {
-          "name": "country_id",
+        "user_id": {
+          "name": "user_id",
           "type": "int",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "popularity": {
-          "name": "popularity",
-          "type": "enum('unknown','known','popular')",
+        "event": {
+          "name": "event",
+          "type": "enum('github_commit','leetcode_submission')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false,
+          "default": "(CURDATE())"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "user_id_date_event_idx": {
+          "name": "user_id_date_event_idx",
+          "columns": [
+            "user_id",
+            "date",
+            "event"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "cities_id": {
-          "name": "cities_id",
+        "user_daily_progress_id": {
+          "name": "user_daily_progress_id",
           "columns": [
             "id"
           ]
@@ -48,8 +66,8 @@
       },
       "uniqueConstraints": {}
     },
-    "countries": {
-      "name": "countries",
+    "user_profiles": {
+      "name": "user_profiles",
       "columns": {
         "id": {
           "name": "id",
@@ -58,33 +76,48 @@
           "notNull": true,
           "autoincrement": true
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(256)",
+        "user_id": {
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "current_streak": {
+          "name": "current_streak",
+          "type": "int",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": 0
+        },
+        "last_consumed_event_date": {
+          "name": "last_consumed_event_date",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "CURRENT_TIMESTAMP"
         }
       },
-      "indexes": {
-        "name_idx": {
-          "name": "name_idx",
-          "columns": [
-            "name"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "countries_id": {
-          "name": "countries_id",
+        "user_profiles_id": {
+          "name": "user_profiles_id",
           "columns": [
             "id"
           ]
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "user_profiles_user_id_unique": {
+          "name": "user_profiles_user_id_unique",
+          "columns": [
+            "user_id"
+          ]
+        }
+      }
     },
     "users": {
       "name": "users",
@@ -96,15 +129,29 @@
           "notNull": true,
           "autoincrement": true
         },
-        "full_name": {
-          "name": "full_name",
-          "type": "text",
+        "email": {
+          "name": "email",
+          "type": "varchar(256)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "phone": {
-          "name": "phone",
+        "user_name": {
+          "name": "user_name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "github_id": {
+          "name": "github_id",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "github_access_token": {
+          "name": "github_access_token",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false,
@@ -121,7 +168,26 @@
           ]
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "columns": [
+            "email"
+          ]
+        },
+        "users_user_name_unique": {
+          "name": "users_user_name_unique",
+          "columns": [
+            "user_name"
+          ]
+        },
+        "users_github_id_unique": {
+          "name": "users_github_id_unique",
+          "columns": [
+            "github_id"
+          ]
+        }
+      }
     }
   },
   "schemas": {},
