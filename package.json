@@ -5,8 +5,8 @@
   "main": "index.js",
   "private": true,
   "workspaces": [
-    "src/packages/*",
-    "src/apps/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "web": "npm run dev --workspace=web",
