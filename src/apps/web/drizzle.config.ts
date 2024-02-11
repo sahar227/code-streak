@@ -1,15 +1,11 @@
+import { connectionString } from "@/config";
 import type { Config } from "drizzle-kit";
 
-export const credentials = {
-  host: "localhost",
-  user: "root",
-  database: "test",
-  password: "password",
-};
-
 export default {
-  schema: "./db/schema.ts",
+  schema: "./src/db/schema.ts",
   out: "./drizzle",
-  driver: "mysql2", // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
-  dbCredentials: credentials,
+  driver: "pg", // 'pg' | 'mysql2' | 'better-sqlite' | 'libsql' | 'turso'
+  dbCredentials: {
+    connectionString,
+  },
 } satisfies Config;

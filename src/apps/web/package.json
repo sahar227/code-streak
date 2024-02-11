@@ -7,16 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migration:generate": "drizzle-kit generate:mysql",
-    "migration:run": "ts-node --skip-project db/migrate.ts",
+    "migration:generate": "drizzle-kit generate:pg",
+    "migration:run": "ts-node --skip-project scripts/migrateDb.ts",
     "migration:drop": "drizzle-kit drop",
-    "db:view": "drizzle-kit studio"
+    "db:view": "drizzle-kit studio",
+    "db:seed": "ts-node --skip-project scripts/seedDb.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.29.3",
     "drizzle-zod": "^0.5.1",
-    "mysql2": "^3.9.0",
     "next": "14.1.0",
+    "pg": "^8.11.3",
+    "postgres": "^3.4.3",
     "react": "^18",
     "react-dom": "^18"
   },
