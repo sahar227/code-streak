@@ -4,7 +4,7 @@ import React from "react";
 export const TestTW = () => {
   return (
     <View>
-      <Text className="text-red-800">TestTW!!!!!</Text>
+      <Text className="text-purple-800">TestTW!!!!!</Text>
     </View>
   );
 };

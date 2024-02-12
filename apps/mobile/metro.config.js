@@ -1,4 +1,6 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const { FileStore } = require('metro-cache');
+
 const path = require('path');
 
 // Find the project and workspace directories
@@ -15,5 +17,11 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
+// #3 - Force resolving nested modules to the folders below
+config.resolver.disableHierarchicalLookup = true;
+
+config.cacheStores = [
+    new FileStore({ root: path.join(projectRoot, 'node_modules', '.cache', 'metro') }),
+  ];
 
 module.exports = config;
