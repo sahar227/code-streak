@@ -19,7 +19,7 @@ export default function Auth() {
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: clientID,
-      scopes: ["identity"],
+      scopes: ["identity", "user:email"],
       redirectUri: makeRedirectUri({
         scheme: "code-streak",
       }),
