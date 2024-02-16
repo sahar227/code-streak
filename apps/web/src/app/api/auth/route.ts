@@ -25,16 +25,31 @@ export async function POST(req: Request) {
       client_id: cliendId,
       client_secret: clientSecret,
       code,
+    },
+    {
+      headers: {
+        Accept: "application/json",
+      },
     }
   );
 
-  const { data } = await axios.get("https://api.github.com/user", {
+  const { data: user } = await axios.get("https://api.github.com/user", {
     headers: {
       Authorization: `token ${access_token}`,
     },
   });
 
-  //console.log(data);
+  console.log(user);
 
-  return Response.json(data);
+  const { data: emailData } = await axios.get(
+    "https://api.github.com/user/emails",
+    {
+      headers: {
+        Authorization: `token ${access_token}`,
+      },
+    }
+  );
+  console.log("emailData:", emailData);
+
+  return Response.json(user);
 }

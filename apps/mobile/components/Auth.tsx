@@ -39,7 +39,7 @@ export default function Auth() {
     console.log("code-", code);
     codeStreakApi
       .post("auth", { code })
-      .then(({ data }) => console.log(data))
+      .then(({ data }) => console.log(data.login))
       .catch((e) => console.log(e.message));
   }, [response]);
 
