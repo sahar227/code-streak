@@ -2,6 +2,7 @@ import { View, Text, Button } from "react-native";
 import React, { useEffect } from "react";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
+import { codeStreakApi } from "@/api";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -36,6 +37,10 @@ export default function Auth() {
     const { code } = response.params;
 
     console.log("code-", code);
+    codeStreakApi
+      .post("auth", { code })
+      .then(({ data }) => console.log(data.login))
+      .catch((e) => console.log(e.message));
   }, [response]);
 
   return (

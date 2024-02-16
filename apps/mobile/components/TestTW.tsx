@@ -5,6 +5,7 @@ export const TestTW = () => {
   return (
     <View>
       <Text className="text-purple-800">TestTW!!!!!</Text>
+      <Text>TestTW!!!!!</Text>
     </View>
   );
 };
