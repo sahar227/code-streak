@@ -1,4 +1,4 @@
-import axios from "axios";
+import { githubAPi } from "@/api";
 import { z } from "zod";
 
 const codeSchema = z.object({ code: z.string() });
@@ -6,34 +6,23 @@ const codeSchema = z.object({ code: z.string() });
 const cliendId = process.env.AUTH_CLIENT_ID;
 const clientSecret = process.env.AUTH_SECRET;
 
-console.log("clientId:", cliendId);
-console.log("clientSecret:", clientSecret);
-
 export async function POST(req: Request) {
-  console.log("POST /api/auth");
-
   // get code from body
   const body = await req.json();
   const code = codeSchema.parse(body).code;
-  console.log("code:", code);
 
   const {
     data: { access_token },
-  } = await axios.post<{ access_token: string }>(
-    "https://github.com/login/oauth/access_token",
+  } = await githubAPi.post<{ access_token: string }>(
+    "login/oauth/access_token",
     {
       client_id: cliendId,
       client_secret: clientSecret,
       code,
-    },
-    {
-      headers: {
-        Accept: "application/json",
-      },
     }
   );
 
-  const { data: user } = await axios.get("https://api.github.com/user", {
+  const { data: user } = await githubAPi.get("user", {
     headers: {
       Authorization: `token ${access_token}`,
     },
@@ -41,14 +30,11 @@ export async function POST(req: Request) {
 
   console.log(user);
 
-  const { data: emailData } = await axios.get(
-    "https://api.github.com/user/emails",
-    {
-      headers: {
-        Authorization: `token ${access_token}`,
-      },
-    }
-  );
+  const { data: emailData } = await githubAPi.get("user/emails", {
+    headers: {
+      Authorization: `token ${access_token}`,
+    },
+  });
   console.log("emailData:", emailData);
 
   return Response.json(user);
