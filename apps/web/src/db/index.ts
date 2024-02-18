@@ -1,3 +1,4 @@
+import { connectionString as configConnectionString } from "@/config";
 import * as schema from "./schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";
@@ -12,7 +13,7 @@ export function connect(connectionString: string) {
 }
 
 export function db() {
-  if (!_db) throw new Error("Must connect first!");
+  if (!_db) connect(configConnectionString);
   return _db;
 }
 

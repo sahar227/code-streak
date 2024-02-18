@@ -1,6 +1,8 @@
 import { githubAPi } from "@/api";
 import { z } from "zod";
 import { GitHubEmail, GitHubUser } from "./githubTypes";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 
 const codeSchema = z.object({ code: z.string() });
 
@@ -22,13 +24,13 @@ export async function POST(req: Request) {
     }
   );
 
-  const { data: user } = await githubAPi.get<GitHubUser>("user", {
+  const { data: githubUser } = await githubAPi.get<GitHubUser>("user", {
     headers: {
       Authorization: `token ${access_token}`,
     },
   });
 
-  console.log(user);
+  console.log(githubUser);
 
   const { data: emailData } = await githubAPi.get<GitHubEmail[]>(
     "user/emails",
@@ -44,11 +46,16 @@ export async function POST(req: Request) {
 
   const codeStreakUser = {
     email,
-    githubId: user.id,
-    username: user.login,
-    gitHubUrl: user.url,
-    repos_url: user.repos_url,
+    githubId: githubUser.id,
+    username: githubUser.login,
+    gitHubUrl: githubUser.url,
+    repos_url: githubUser.repos_url,
   };
 
-  return Response.json(user);
+  const [user] = await db()
+    .insert(users)
+    .values({ authId: githubUser.id.toString(), email: email })
+    .returning({ id: users.id });
+
+  return Response.json(githubUser);
 }
