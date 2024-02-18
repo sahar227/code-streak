@@ -2,7 +2,8 @@ import { githubAPi } from "@/api";
 import { z } from "zod";
 import { GitHubEmail, GitHubUser } from "./githubTypes";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { githubProfiles, users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const codeSchema = z.object({ code: z.string() });
 
@@ -30,7 +31,16 @@ export async function POST(req: Request) {
     },
   });
 
-  console.log(githubUser);
+  const existingUser = await db().query.users.findFirst({
+    where: eq(users.authId, githubUser.id.toString()),
+  });
+  if (existingUser) {
+    const authResponse = {
+      userId: existingUser.id,
+      githubAuthToken: access_token,
+    };
+    return Response.json(authResponse);
+  }
 
   const { data: emailData } = await githubAPi.get<GitHubEmail[]>(
     "user/emails",
@@ -44,18 +54,30 @@ export async function POST(req: Request) {
   if (!email)
     return Response.json({ error: "No primary email found" }, { status: 400 });
 
-  const codeStreakUser = {
-    email,
-    githubId: githubUser.id,
-    username: githubUser.login,
-    gitHubUrl: githubUser.url,
-    repos_url: githubUser.repos_url,
+  const user = (
+    await db()
+      .insert(users)
+      .values({
+        authId: githubUser.id.toString(),
+        email: email,
+        name: githubUser.name,
+        userName: githubUser.login,
+      })
+      .returning({ id: users.id })
+  ).at(0);
+
+  if (!user)
+    return Response.json({ error: "Failed to create user" }, { status: 500 });
+
+  await db().insert(githubProfiles).values({
+    githubUserId: githubUser.id.toString(),
+    userId: user.id,
+    reposUrl: githubUser.repos_url,
+  });
+
+  const authResponse = {
+    userId: user.id,
+    githubAuthToken: access_token,
   };
-
-  const [user] = await db()
-    .insert(users)
-    .values({ authId: githubUser.id.toString(), email: email })
-    .returning({ id: users.id });
-
-  return Response.json(githubUser);
+  return Response.json(authResponse);
 }
