@@ -4,6 +4,7 @@ import { GitHubEmail, GitHubUser } from "./githubTypes";
 import { db } from "@/db";
 import { githubProfiles, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import jwt from "jsonwebtoken";
 
 const codeSchema = z.object({ code: z.string() });
 
@@ -39,7 +40,8 @@ export async function POST(req: Request) {
       userId: existingUser.id,
       githubAuthToken: access_token,
     };
-    return Response.json(authResponse);
+    const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
+    return Response.json(token);
   }
 
   const { data: emailData } = await githubAPi.get<GitHubEmail[]>(
@@ -79,5 +81,6 @@ export async function POST(req: Request) {
     userId: user.id,
     githubAuthToken: access_token,
   };
-  return Response.json(authResponse);
+  const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
+  return Response.json(token);
 }
