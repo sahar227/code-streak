@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       githubAuthToken: access_token,
     };
     const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
-    return Response.json(token);
+    return Response.json({ token });
   }
 
   const { data: emailData } = await githubAPi.get<GitHubEmail[]>(
@@ -82,5 +82,5 @@ export async function POST(req: Request) {
     githubAuthToken: access_token,
   };
   const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
-  return Response.json(token);
+  return Response.json({ token });
 }
