@@ -1,4 +1,5 @@
 import { table } from "console";
+import { relations } from "drizzle-orm";
 import {
   integer,
   pgTable,
@@ -37,3 +38,10 @@ export const githubProfiles = pgTable(
     uniqueReposUrl: unique("repos_url_unique").on(table.reposUrl),
   })
 );
+
+export const userRelations = relations(users, ({ one }) => ({
+  githubProfile: one(githubProfiles, {
+    fields: [users.authId],
+    references: [githubProfiles.githubUserId],
+  }),
+}));
