@@ -5,7 +5,7 @@ import * as WebBrowser from "expo-web-browser";
 import { codeStreakApi } from "@/api";
 import * as SecureStore from "expo-secure-store";
 import { useSetAtom } from "jotai";
-import { tokenFetchAtom } from "@/app/state/auth";
+import { tokenFetchAtom, userAtom } from "@/app/state/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -60,11 +60,12 @@ export default function Auth() {
 
 export function Logout() {
   const setTokenFetched = useSetAtom(tokenFetchAtom);
-
+  const setUser = useSetAtom(userAtom);
   function logout() {
-    SecureStore.deleteItemAsync("auth-token").then(() =>
-      setTokenFetched(false)
-    );
+    SecureStore.deleteItemAsync("auth-token").then(() => {
+      setTokenFetched(false);
+      setUser(undefined);
+    });
   }
   return <Button title="Logout" onPress={logout} />;
 }
