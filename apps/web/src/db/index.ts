@@ -1,4 +1,4 @@
-import { connectionString as configConnectionString } from "@/config";
+import { connectionString as configConnectionString } from "../config";
 import * as schema from "./schema";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { PostgresJsDatabase } from "drizzle-orm/postgres-js";

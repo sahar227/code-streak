@@ -3,9 +3,12 @@ import { StyleSheet } from "react-native";
 import EditScreenInfo from "@/components/EditScreenInfo";
 import { Text, View } from "@/components/Themed";
 import { TestTW } from "@/components/TestTW";
-import Auth from "@/components/Auth";
+import Auth, { Logout } from "@/components/Auth";
+import { useAtomValue } from "jotai";
+import { userAtom } from "../state/auth";
 
 export default function TabOneScreen() {
+  const user = useAtomValue(userAtom);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tab One</Text>
@@ -16,7 +19,9 @@ export default function TabOneScreen() {
       />
       <EditScreenInfo path="app/(tabs)/index.tsx" />
       <TestTW />
-      <Auth />
+      {!user && <Auth />}
+      {user && <Logout />}
+      {user && <Text>Hello {user.name}</Text>}
     </View>
   );
 }

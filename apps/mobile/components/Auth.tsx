@@ -3,6 +3,9 @@ import React, { useEffect } from "react";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { codeStreakApi } from "@/api";
+import * as SecureStore from "expo-secure-store";
+import { useSetAtom } from "jotai";
+import { tokenFetchAtom } from "@/app/state/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -17,6 +20,7 @@ const discovery = {
 };
 
 export default function Auth() {
+  const setTokenFetched = useSetAtom(tokenFetchAtom);
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: clientID,
@@ -39,7 +43,10 @@ export default function Auth() {
     console.log("code-", code);
     codeStreakApi
       .post("auth", { code })
-      .then(({ data }) => console.log(data.login))
+      .then(({ data }) => {
+        SecureStore.setItemAsync("auth-token", data.token);
+        setTokenFetched(true);
+      })
       .catch((e) => console.log(e.message));
   }, [response]);
 
@@ -49,4 +56,15 @@ export default function Auth() {
       <Button disabled={!request} title="Login" onPress={() => promptAsync()} />
     </View>
   );
+}
+
+export function Logout() {
+  const setTokenFetched = useSetAtom(tokenFetchAtom);
+
+  function logout() {
+    SecureStore.deleteItemAsync("auth-token").then(() =>
+      setTokenFetched(false)
+    );
+  }
+  return <Button title="Logout" onPress={logout} />;
 }
