@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { githubProfiles, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 const codeSchema = z.object({ code: z.string() });
 
@@ -17,12 +18,17 @@ export async function POST(req: Request) {
 
   const {
     data: { access_token },
-  } = await githubAPi.post<{ access_token: string }>(
-    "login/oauth/access_token",
+  } = await axios.post<{ access_token: string }>(
+    "https://github.com/login/oauth/access_token",
     {
       client_id: cliendId,
       client_secret: clientSecret,
       code,
+    },
+    {
+      headers: {
+        Accept: "application/json",
+      },
     }
   );
 
@@ -31,6 +37,7 @@ export async function POST(req: Request) {
       Authorization: `token ${access_token}`,
     },
   });
+  console.log(githubUser);
 
   const existingUser = await db().query.users.findFirst({
     where: eq(users.authId, githubUser.id.toString()),
@@ -62,7 +69,7 @@ export async function POST(req: Request) {
       .values({
         authId: githubUser.id.toString(),
         email: email,
-        name: githubUser.name,
+        name: githubUser.login,
         userName: githubUser.login,
       })
       .returning({ id: users.id })
