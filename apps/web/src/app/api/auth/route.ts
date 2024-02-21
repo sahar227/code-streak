@@ -7,6 +7,11 @@ import * as github from "@/api/github";
 
 const codeSchema = z.object({ code: z.string() });
 
+const signJwt = (userId: number, githubAuthToken: string) => {
+  const authResponse = { userId, githubAuthToken };
+  return jwt.sign(authResponse, process.env.JWT_SECRET!);
+};
+
 export async function POST(req: Request) {
   const body = await req.json();
   const code = codeSchema.parse(body).code;
@@ -19,11 +24,7 @@ export async function POST(req: Request) {
   });
 
   if (existingUser) {
-    const authResponse = {
-      userId: existingUser.id,
-      githubAuthToken: accessToken,
-    };
-    const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
+    const token = signJwt(existingUser.id, accessToken);
     return Response.json({ token });
   }
 
@@ -52,10 +53,6 @@ export async function POST(req: Request) {
     reposUrl: githubUser.repos_url,
   });
 
-  const authResponse = {
-    userId: user.id,
-    githubAuthToken: accessToken,
-  };
-  const token = jwt.sign(authResponse, process.env.JWT_SECRET!);
+  const token = signJwt(user.id, accessToken);
   return Response.json({ token });
 }
