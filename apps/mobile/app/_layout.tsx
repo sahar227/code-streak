@@ -13,7 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import { useColorScheme } from "@/components/useColorScheme";
 import { codeStreakApi } from "@/api";
 import { useAtomValue, useSetAtom } from "jotai";
-import { tokenFetchAtom, userAtom } from "./state/auth";
+import { tokenExistsAtom, userAtom } from "./state/auth";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -36,9 +36,11 @@ export default function RootLayout() {
 
   const [authLoaded, setAuthLoaded] = useState(false);
   const setUser = useSetAtom(userAtom);
-  const tokenFetched = useAtomValue(tokenFetchAtom);
+  const tokenExists = useAtomValue(tokenExistsAtom);
 
   useEffect(() => {
+    if (!tokenExists) return;
+
     async function loadToken() {
       const token = await SecureStore.getItemAsync("auth-token");
       if (!token) {
@@ -53,7 +55,7 @@ export default function RootLayout() {
     }
     setAuthLoaded(false);
     loadToken().finally(() => setAuthLoaded(true));
-  }, [tokenFetched]);
+  }, [tokenExists]);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {

@@ -5,7 +5,7 @@ import * as WebBrowser from "expo-web-browser";
 import { codeStreakApi } from "@/api";
 import * as SecureStore from "expo-secure-store";
 import { useSetAtom } from "jotai";
-import { tokenFetchAtom, userAtom } from "@/app/state/auth";
+import { tokenExistsAtom, userAtom } from "@/app/state/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,7 +20,7 @@ const discovery = {
 };
 
 export default function Auth() {
-  const setTokenFetched = useSetAtom(tokenFetchAtom);
+  const setTokenExists = useSetAtom(tokenExistsAtom);
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: clientID,
@@ -45,7 +45,7 @@ export default function Auth() {
       .post("auth", { code })
       .then(({ data }) => {
         SecureStore.setItemAsync("auth-token", data.token);
-        setTokenFetched(true);
+        setTokenExists(true);
       })
       .catch((e) => console.log(e.message));
   }, [response]);
@@ -59,11 +59,11 @@ export default function Auth() {
 }
 
 export function Logout() {
-  const setTokenFetched = useSetAtom(tokenFetchAtom);
+  const setTokenExists = useSetAtom(tokenExistsAtom);
   const setUser = useSetAtom(userAtom);
   function logout() {
     SecureStore.deleteItemAsync("auth-token").then(() => {
-      setTokenFetched(false);
+      setTokenExists(false);
       setUser(undefined);
     });
   }
