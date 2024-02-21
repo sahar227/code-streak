@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const githubAPi = axios.create({
+export const githubClient = axios.create({
   baseURL: "https://api.github.com",
   headers: {
     Accept: "application/json",
