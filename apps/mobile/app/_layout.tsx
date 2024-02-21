@@ -13,7 +13,7 @@ import * as SecureStore from "expo-secure-store";
 import { useColorScheme } from "@/components/useColorScheme";
 import { codeStreakApi } from "@/api";
 import { useAtomValue, useSetAtom } from "jotai";
-import { tokenExistsAtom, userAtom } from "./state/auth";
+import { tokenExistsAtom, userAtom } from "../state/auth";
 
 export {
   // Catch any errors thrown by the Layout component.

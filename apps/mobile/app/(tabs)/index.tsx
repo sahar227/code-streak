@@ -5,7 +5,7 @@ import { Text, View } from "@/components/Themed";
 import { TestTW } from "@/components/TestTW";
 import Auth, { Logout } from "@/components/Auth";
 import { useAtomValue } from "jotai";
-import { userAtom } from "../state/auth";
+import { userAtom } from "../../state/auth";
 
 export default function TabOneScreen() {
   const user = useAtomValue(userAtom);

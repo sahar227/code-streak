@@ -5,7 +5,7 @@ import * as WebBrowser from "expo-web-browser";
 import { codeStreakApi } from "@/api";
 import * as SecureStore from "expo-secure-store";
 import { useSetAtom } from "jotai";
-import { tokenExistsAtom, userAtom } from "@/app/state/auth";
+import { tokenExistsAtom, userAtom } from "@/state/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
