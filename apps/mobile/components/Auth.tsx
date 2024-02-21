@@ -2,10 +2,7 @@ import { View, Text, Button } from "react-native";
 import React, { useEffect } from "react";
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import { codeStreakApi } from "@/api";
-import * as SecureStore from "expo-secure-store";
-import { useSetAtom } from "jotai";
-import { tokenExistsAtom, userAtom } from "@/state/auth";
+import { useLogin, useLogout } from "@/utils/hooks/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,7 +17,7 @@ const discovery = {
 };
 
 export default function Auth() {
-  const setTokenExists = useSetAtom(tokenExistsAtom);
+  const login = useLogin();
   const [request, response, promptAsync] = useAuthRequest(
     {
       clientId: clientID,
@@ -33,21 +30,11 @@ export default function Auth() {
   );
 
   useEffect(() => {
-    console.log(response);
-
     if (!response) return;
     if (response.type !== "success") return; // TODO: do something when this happens
 
     const { code } = response.params;
-
-    console.log("code-", code);
-    codeStreakApi
-      .post("auth", { code })
-      .then(({ data }) => {
-        SecureStore.setItemAsync("auth-token", data.token);
-        setTokenExists(true);
-      })
-      .catch((e) => console.log(e.message));
+    login(code);
   }, [response]);
 
   return (
@@ -59,13 +46,6 @@ export default function Auth() {
 }
 
 export function Logout() {
-  const setTokenExists = useSetAtom(tokenExistsAtom);
-  const setUser = useSetAtom(userAtom);
-  function logout() {
-    SecureStore.deleteItemAsync("auth-token").then(() => {
-      setTokenExists(false);
-      setUser(undefined);
-    });
-  }
+  const logout = useLogout();
   return <Button title="Logout" onPress={logout} />;
 }
