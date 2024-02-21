@@ -13,7 +13,7 @@ export default function Auth() {
       <Text>Github Auth</Text>
       <Button
         disabled={isLoading}
-        title="Login"
+        title={isLoading ? "Loading..." : "Login"}
         onPress={() => promptAsync()}
       />
     </View>

@@ -4,7 +4,7 @@ import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
 import { codeStreakApi } from "@/api";
 import { authStorageKey } from "./constants";
 import * as SecureStore from "expo-secure-store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const clientID =
   process.env.EXPO_PUBLIC_AUTH_CLIENT_ID || "CLIENT_ID IS REQUIRED";
@@ -18,6 +18,7 @@ const discovery = {
 
 export const useGithubLogin = () => {
   const setTokenExists = useSetAtom(tokenExistsAtom);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [request, response, promptAsync] = useAuthRequest(
     {
@@ -31,13 +32,15 @@ export const useGithubLogin = () => {
   );
 
   function login(code: string) {
+    setIsLoading(true);
     codeStreakApi
       .post("auth", { code })
       .then(({ data }) => {
         SecureStore.setItemAsync(authStorageKey, data.token);
         setTokenExists(true);
       })
-      .catch((e) => console.log(e.message));
+      .catch((e) => console.log(e.message))
+      .finally(() => setIsLoading(false));
   }
 
   useEffect(() => {
@@ -48,5 +51,5 @@ export const useGithubLogin = () => {
     login(code);
   }, [response]);
 
-  return { isLoading: !request, promptAsync };
+  return { isLoading: !request || isLoading, promptAsync };
 };
