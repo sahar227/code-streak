@@ -11,9 +11,9 @@ export const useLoadUser = () => {
   const tokenExists = useAtomValue(tokenExistsAtom);
 
   useEffect(() => {
-    if (!tokenExists) return;
-
     async function loadToken() {
+      if (!tokenExists) return;
+
       const token = await SecureStore.getItemAsync(authStorageKey);
       if (!token) {
         return;
