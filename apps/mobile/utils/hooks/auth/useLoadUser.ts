@@ -21,9 +21,8 @@ export const useLoadUser = () => {
       codeStreakApi.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${token}`;
-
-      // TODO: fetch user from token
-      setUser({ name: "Sahar" });
+      const { data: user } = await codeStreakApi.get("/users");
+      setUser(user);
     }
     setAuthLoaded(false);
     loadToken().finally(() => setAuthLoaded(true));
