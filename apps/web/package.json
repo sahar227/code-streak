@@ -24,7 +24,8 @@
     "postgres": "^3.4.3",
     "react": "^18",
     "react-dom": "^18",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "contracts": "1.0.0"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^10.7.1",

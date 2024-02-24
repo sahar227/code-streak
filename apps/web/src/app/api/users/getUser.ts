@@ -3,7 +3,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-
+import { UserResponse } from "contracts";
 const tokenContentSchema = z.object({
   userId: z.number(),
   githubAuthToken: z.string(),
@@ -13,7 +13,9 @@ const decriptJwt = (token: string) => {
   return tokenContentSchema.parse(tokenContent);
 };
 
-export const getUser = async (token: string) => {
+export const getUser = async (
+  token: string
+): Promise<UserResponse | undefined> => {
   const tokenData = decriptJwt(token);
   const user = await db().query.users.findFirst({
     where: eq(users.id, tokenData.userId),

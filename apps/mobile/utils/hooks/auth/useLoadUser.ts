@@ -4,6 +4,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { authStorageKey } from "./constants";
 import { codeStreakApi } from "@/api";
+import { userResponseSchema } from "contracts";
 
 export const useLoadUser = () => {
   const [authLoaded, setAuthLoaded] = useState(false);
@@ -21,7 +22,8 @@ export const useLoadUser = () => {
       codeStreakApi.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${token}`;
-      const { data: user } = await codeStreakApi.get("/users");
+      const { data } = await codeStreakApi.get("/users");
+      const user = userResponseSchema.parse(data);
       setUser(user);
     }
     setAuthLoaded(false);
