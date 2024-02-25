@@ -17,8 +17,18 @@ export const getUser = async (
   token: string
 ): Promise<UserResponse | undefined> => {
   const tokenData = decriptJwt(token);
-  const user = await db().query.users.findFirst({
+  const dbUser = await db().query.users.findFirst({
     where: eq(users.id, tokenData.userId),
+    with: { userStatus: true },
   });
+
+  if (!dbUser) return undefined;
+
+  const user = {
+    name: dbUser.name,
+    currentStreak: dbUser.userStatus.currentStreak,
+    longestStreak: dbUser.userStatus.longestStreak,
+    xp: dbUser.userStatus.xp,
+  } satisfies UserResponse;
   return user;
 };
