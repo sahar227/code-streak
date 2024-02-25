@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import * as github from "@/api/github";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
-import { githubProfiles, users } from "@/db/schema";
+import { githubProfiles, userStatuses, users } from "@/db/schema";
 
 type AuthWithGithubCodeResponse =
   | { token: string; isSuccess: true }
@@ -52,6 +52,10 @@ export async function authWithGithubCode(
       githubUserId: githubUser.id.toString(),
       userId: user.id,
       reposUrl: githubUser.repos_url,
+    });
+
+    await db().insert(userStatuses).values({
+      userId: user.id,
     });
 
     const token = signJwt(user.id, accessToken);
