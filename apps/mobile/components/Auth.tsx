@@ -1,4 +1,4 @@
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, TouchableOpacity } from "react-native";
 import React from "react";
 import * as WebBrowser from "expo-web-browser";
 import { useGithubLogin, useLogout } from "@/utils/hooks/auth";
@@ -22,5 +22,11 @@ export default function Auth() {
 
 export function Logout() {
   const logout = useLogout();
-  return <Button title="Logout" onPress={logout} />;
+  return (
+    <TouchableOpacity onPress={logout}>
+      <Text className="pt-2 pb-2 pl-4 pr-4 text-center text-white rounded-lg bg-slate-700">
+        Logout
+      </Text>
+    </TouchableOpacity>
+  );
 }
