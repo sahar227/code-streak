@@ -39,9 +39,28 @@ export const githubProfiles = pgTable(
   })
 );
 
+export const userStatuses = pgTable(
+  "user_statuses",
+  {
+    userId: integer("user_id")
+      .primaryKey()
+      .references(() => users.id),
+    xp: integer("xp").notNull().default(0),
+    currentStreak: integer("current_streak").notNull().default(0),
+    longestStreak: integer("longest_streak").notNull().default(0),
+  },
+  (table) => ({
+    uniqueUserId: uniqueIndex("user_id_unique").on(table.userId),
+  })
+);
+
 export const userRelations = relations(users, ({ one }) => ({
   githubProfile: one(githubProfiles, {
     fields: [users.authId],
     references: [githubProfiles.githubUserId],
+  }),
+  userStatus: one(userStatuses, {
+    fields: [users.id],
+    references: [userStatuses.userId],
   }),
 }));
