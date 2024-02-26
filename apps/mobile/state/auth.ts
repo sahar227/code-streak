@@ -1,7 +1,4 @@
 import { atom } from "jotai";
-
-interface User {
-  name: string;
-}
-export const userAtom = atom<User | undefined>(undefined);
+import { UserResponse } from "contracts";
+export const userAtom = atom<UserResponse | undefined>(undefined);
 export const tokenExistsAtom = atom(false);

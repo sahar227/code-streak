@@ -39,7 +39,10 @@ export const useGithubLogin = () => {
         SecureStore.setItemAsync(authStorageKey, data.token);
         setTokenExists(true);
       })
-      .catch((e) => console.log(e.message))
+      .catch((e) => {
+        setTokenExists(false);
+        console.log(e.message);
+      })
       .finally(() => setIsLoading(false));
   }
 

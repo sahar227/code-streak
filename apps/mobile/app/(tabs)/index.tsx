@@ -20,7 +20,7 @@ export default function TabOneScreen() {
         <Text className="text-3xl text-white">Code Streak:</Text>
         <View className="w-full pt-4 pb-4 m-1 bg-sky-200">
           <Text className="text-6xl font-bold text-center text-sky-700">
-            60 Days!
+            {user.currentStreak} Days!
           </Text>
         </View>
         <Text className="text-xl text-white">Keep it up!</Text>
