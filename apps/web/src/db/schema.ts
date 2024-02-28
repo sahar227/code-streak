@@ -1,9 +1,9 @@
-import { table } from "console";
 import { relations } from "drizzle-orm";
 import {
   integer,
   pgTable,
   serial,
+  timestamp,
   unique,
   uniqueIndex,
   varchar,
@@ -48,6 +48,7 @@ export const userStatuses = pgTable(
     xp: integer("xp").notNull().default(0),
     currentStreak: integer("current_streak").notNull().default(0),
     longestStreak: integer("longest_streak").notNull().default(0),
+    lastUodatedAt: timestamp("last_updated_at").notNull().defaultNow(),
   },
   (table) => ({
     uniqueUserId: uniqueIndex("user_id_unique").on(table.userId),

@@ -1,0 +1,1 @@
+ALTER TABLE "user_statuses" ADD COLUMN "last_updated_at" timestamp DEFAULT now() NOT NULL;
