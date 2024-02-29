@@ -48,7 +48,8 @@ export const userStatuses = pgTable(
     xp: integer("xp").notNull().default(0),
     currentStreak: integer("current_streak").notNull().default(0),
     longestStreak: integer("longest_streak").notNull().default(0),
-    lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(),
+    streakExtendedAt: timestamp("streak_extended_at"),
+    lastUpdatedAt: timestamp("last_updated_at").notNull().defaultNow(), // when we last synced
   },
   (table) => ({
     uniqueUserId: uniqueIndex("user_id_unique").on(table.userId),

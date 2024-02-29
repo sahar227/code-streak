@@ -1,0 +1,1 @@
+ALTER TABLE "user_statuses" ADD COLUMN "streak_extended_at" timestamp;
