@@ -24,24 +24,45 @@ export const syncCommits = async (
 
   console.log("Syncing commits", newPushes);
 
-  const isExtendedToday =
-    !!userStatus.streakExtendedAt &&
-    checkIsExtendedToday(userStatus.streakExtendedAt);
+  const pushesByDay = newPushes.reduce((acc, push) => {
+    const date = new Date(push.pushedAt).toDateString();
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(push);
+    return acc;
+  }, {} as Record<string, typeof newPushes>);
 
-  // if we didn't yet extend the streak today, we need to do it now
-  //   await db()
-  //     .update(userStatuses)
-  //     .set({
-  //       lastUpdatedAt: new Date(),
-  //       currentStreak: userStatus.currentStreak + 1,
-  //       longestStreak: Math.max(
-  //         userStatus.currentStreak + 1,
-  //         userStatus.longestStreak
-  //       ),
-  //       streakExtendedAt: new Date(),
-  //     });
+  let newStreak = userStatus.currentStreak;
+  let newLongestStreak = userStatus.longestStreak;
+  let streakExtendedAt = new Date(userStatus?.streakExtendedAt ?? 0);
+  streakExtendedAt.setHours(0, 0, 0, 0);
+  let dateIndex = new Date(userStatus.lastUpdatedAt);
+  dateIndex.setHours(0, 0, 0, 0);
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+
+  while (dateIndex <= todayDate) {
+    const date = dateIndex.toDateString();
+    if (pushesByDay[date] && pushesByDay[date].length > 0) {
+      if (dateIndex > streakExtendedAt) {
+        newStreak++;
+        newLongestStreak = Math.max(newStreak, newLongestStreak);
+        streakExtendedAt = new Date(dateIndex);
+      }
+    }
+    // If it's today, user still has a chance to extend the streak
+    else if (dateIndex !== todayDate) {
+      newStreak = 0;
+    }
+    // set dateIndex to the next day
+    dateIndex.setDate(dateIndex.getDate() + 1);
+  }
+
+  await db().update(userStatuses).set({
+    lastUpdatedAt: new Date(),
+    currentStreak: newStreak,
+    longestStreak: newLongestStreak,
+    streakExtendedAt: streakExtendedAt,
+  });
 };
-
-function checkIsExtendedToday(streakExtendedAt: Date) {
-  return streakExtendedAt.toDateString() === new Date().toDateString();
-}
