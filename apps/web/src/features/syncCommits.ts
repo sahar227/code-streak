@@ -25,11 +25,11 @@ export const syncCommits = async (
 
 export function calculateNewUserStatus(
   pushes: PushEvent[],
-  currentUserStatus: UserStatus
+  currentUserStatus: UserStatus,
+  now = new Date()
 ): UserStatus {
   if (pushes.length === 0) {
     console.log("No new commits to sync");
-    return { ...currentUserStatus, lastUpdatedAt: new Date() };
   }
 
   const pushesByDay = pushes.reduce((acc, push) => {
@@ -47,20 +47,19 @@ export function calculateNewUserStatus(
   streakExtendedAt.setHours(0, 0, 0, 0);
   let dateIndex = new Date(currentUserStatus.lastUpdatedAt);
   dateIndex.setHours(0, 0, 0, 0);
-  const todayDate = new Date();
+  const todayDate = new Date(now);
   todayDate.setHours(0, 0, 0, 0);
 
   while (dateIndex <= todayDate) {
     const date = dateIndex.toDateString();
-    if (pushesByDay[date] && pushesByDay[date].length > 0) {
-      if (dateIndex > streakExtendedAt) {
-        newStreak++;
-        newLongestStreak = Math.max(newStreak, newLongestStreak);
-        streakExtendedAt = new Date(dateIndex);
-      }
+    const eventExists = pushesByDay[date] && pushesByDay[date].length > 0;
+    if (eventExists) {
+      newStreak++;
+      newLongestStreak = Math.max(newStreak, newLongestStreak);
+      streakExtendedAt = new Date(dateIndex);
     }
     // If it's today, user still has a chance to extend the streak
-    else if (dateIndex !== todayDate) {
+    else if (dateIndex.toDateString() !== todayDate.toDateString()) {
       newStreak = 0;
     }
     // set dateIndex to the next day
@@ -69,7 +68,7 @@ export function calculateNewUserStatus(
 
   return {
     ...currentUserStatus,
-    lastUpdatedAt: new Date(),
+    lastUpdatedAt: now,
     currentStreak: newStreak,
     longestStreak: newLongestStreak,
     streakExtendedAt: streakExtendedAt,
