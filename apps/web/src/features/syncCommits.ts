@@ -16,12 +16,6 @@ export const syncCommits = async (
     userStatus.lastUpdatedAt
   );
 
-  if (newPushes.length === 0) {
-    console.log("No new commits to sync");
-    await db().update(userStatuses).set({ lastUpdatedAt: new Date() });
-    return;
-  }
-
   console.log("Syncing commits", newPushes);
 
   const newStatus = calculateNewUserStatus(newPushes, userStatus);
@@ -33,6 +27,11 @@ export function calculateNewUserStatus(
   pushes: PushEvent[],
   currentUserStatus: UserStatus
 ): UserStatus {
+  if (pushes.length === 0) {
+    console.log("No new commits to sync");
+    return { ...currentUserStatus, lastUpdatedAt: new Date() };
+  }
+
   const pushesByDay = pushes.reduce((acc, push) => {
     const date = new Date(push.pushedAt).toDateString();
     if (!acc[date]) {
