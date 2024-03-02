@@ -1,49 +1,40 @@
+import { userStatuses } from "@/db/schema";
+
+type UserStatus = typeof userStatuses.$inferSelect;
+
+const extendedDate = new Date();
+extendedDate.setHours(0, 0, 0, 0); // extended date should alaways be at midnight
+
+const defaultValue: UserStatus = {
+  userId: 1,
+  xp: 0,
+  currentStreak: 0,
+  longestStreak: 0,
+  streakExtendedAt: extendedDate,
+  lastUpdatedAt: new Date(),
+};
+
 export class UserStatusBuilder {
-  private currentStreak = 0;
-  private longestStreak = 0;
-  private lastUpdateDaysAgo = 0;
+  constructor(private userStatus = defaultValue) {}
 
   withCurrentStreak(currentStreak: number) {
-    this.currentStreak = currentStreak;
+    this.userStatus.currentStreak = currentStreak;
     return this;
   }
 
   withLongestStreak(longestStreak: number) {
-    this.longestStreak = longestStreak;
+    this.userStatus.longestStreak = longestStreak;
     return this;
   }
 
   withLastUpdateDaysAgo(lastUpdateDaysAgo: number) {
-    this.lastUpdateDaysAgo = lastUpdateDaysAgo;
+    const lastUpdatedAt = new Date();
+    lastUpdatedAt.setDate(lastUpdatedAt.getDate() - lastUpdateDaysAgo);
+    this.userStatus.lastUpdatedAt = lastUpdatedAt;
     return this;
   }
 
-  getUserStatus = (
-    currentStreak = 0,
-    longestStreak = 0,
-    lastUpdateDaysAgo = 0
-  ) => {
-    const extendedDate = new Date();
-    extendedDate.setHours(0, 0, 0, 0); // extended date should alaways be at midnight
-
-    const lastUpdatedAt = new Date();
-    lastUpdatedAt.setDate(lastUpdatedAt.getDate() - lastUpdateDaysAgo);
-
-    return {
-      userId: 1,
-      xp: 0,
-      currentStreak,
-      longestStreak,
-      streakExtendedAt: extendedDate,
-      lastUpdatedAt,
-    };
-  };
-
   build() {
-    return this.getUserStatus(
-      this.currentStreak,
-      this.longestStreak,
-      this.lastUpdateDaysAgo
-    );
+    return this.userStatus;
   }
 }
