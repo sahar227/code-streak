@@ -1,4 +1,4 @@
-import { getLatestCommits } from "@/api/github/getLatestCommits";
+import { PushEvent, getLatestCommits } from "@/api/github/getLatestCommits";
 import { db } from "@/db";
 import { githubProfiles, userStatuses } from "@/db/schema";
 
@@ -24,20 +24,29 @@ export const syncCommits = async (
 
   console.log("Syncing commits", newPushes);
 
-  const pushesByDay = newPushes.reduce((acc, push) => {
+  const newStatus = calculateNewUserStatus(newPushes, userStatus);
+
+  await db().update(userStatuses).set(newStatus);
+};
+
+export function calculateNewUserStatus(
+  pushes: PushEvent[],
+  currentUserStatus: UserStatus
+): UserStatus {
+  const pushesByDay = pushes.reduce((acc, push) => {
     const date = new Date(push.pushedAt).toDateString();
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(push);
     return acc;
-  }, {} as Record<string, typeof newPushes>);
+  }, {} as Record<string, typeof pushes>);
 
-  let newStreak = userStatus.currentStreak;
-  let newLongestStreak = userStatus.longestStreak;
-  let streakExtendedAt = new Date(userStatus?.streakExtendedAt ?? 0);
+  let newStreak = currentUserStatus.currentStreak;
+  let newLongestStreak = currentUserStatus.longestStreak;
+  let streakExtendedAt = new Date(currentUserStatus?.streakExtendedAt ?? 0);
   streakExtendedAt.setHours(0, 0, 0, 0);
-  let dateIndex = new Date(userStatus.lastUpdatedAt);
+  let dateIndex = new Date(currentUserStatus.lastUpdatedAt);
   dateIndex.setHours(0, 0, 0, 0);
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
@@ -59,10 +68,11 @@ export const syncCommits = async (
     dateIndex.setDate(dateIndex.getDate() + 1);
   }
 
-  await db().update(userStatuses).set({
+  return {
+    ...currentUserStatus,
     lastUpdatedAt: new Date(),
     currentStreak: newStreak,
     longestStreak: newLongestStreak,
     streakExtendedAt: streakExtendedAt,
-  });
-};
+  };
+}

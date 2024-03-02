@@ -29,3 +29,8 @@ export async function getLatestCommits(
     .filter((commit) => commit.commitMessages.length > 0); // only include events with commits
   return commits;
 }
+
+type PushEvents = ReturnType<typeof getLatestCommits> extends Promise<infer T>
+  ? T
+  : never;
+export type PushEvent = PushEvents[0];
