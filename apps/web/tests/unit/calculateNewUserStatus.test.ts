@@ -98,4 +98,32 @@ describe("calculateNewUserStatus", () => {
     };
     expect(newStatus).toEqual(expected);
   });
+
+  it("Should only extend the streak by 1 if there were 2 pushes at the same day", () => {
+    const now = new Date(2024, 3, 3, 11);
+    const pushedAt = new Date(2024, 3, 2, 10); // pushed 1 day before now
+    const pushedAt2 = new Date(2024, 3, 2, 8); // also pushed 1 day before now
+
+    const currentUserStatus = new UserStatusBuilder(undefined, now)
+      .withCurrentStreak(1)
+      .withLongestStreak(1)
+      .withLastUpdateDaysAgo(1)
+      .build();
+    const newStatus = calculateNewUserStatus(
+      [
+        { pushedAt: pushedAt2.toISOString(), commitMessages: [], repo: "test" },
+        { pushedAt: pushedAt.toISOString(), commitMessages: [], repo: "test" },
+      ],
+      currentUserStatus,
+      now
+    );
+    const expected = {
+      ...currentUserStatus,
+      lastUpdatedAt: now,
+      currentStreak: 2,
+      longestStreak: 2,
+      streakExtendedAt: toStartOfDay(pushedAt),
+    };
+    expect(newStatus).toEqual(expected);
+  });
 });
