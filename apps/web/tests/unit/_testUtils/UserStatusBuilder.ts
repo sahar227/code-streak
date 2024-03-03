@@ -2,20 +2,22 @@ import { userStatuses } from "@/db/schema";
 
 type UserStatus = typeof userStatuses.$inferSelect;
 
-const extendedDate = new Date();
-extendedDate.setHours(0, 0, 0, 0); // extended date should alaways be at midnight
+function getDefaultUserStatus(): UserStatus {
+  const extendedDate = new Date();
+  extendedDate.setHours(0, 0, 0, 0); // extended date should alaways be at midnight
 
-const defaultValue: UserStatus = {
-  userId: 1,
-  xp: 0,
-  currentStreak: 0,
-  longestStreak: 0,
-  streakExtendedAt: extendedDate,
-  lastUpdatedAt: new Date(),
-};
+  return {
+    userId: 1,
+    xp: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    streakExtendedAt: extendedDate,
+    lastUpdatedAt: new Date(),
+  };
+}
 
 export class UserStatusBuilder {
-  constructor(private userStatus = defaultValue) {}
+  constructor(private userStatus = getDefaultUserStatus()) {}
 
   withCurrentStreak(currentStreak: number) {
     this.userStatus.currentStreak = currentStreak;
@@ -27,8 +29,8 @@ export class UserStatusBuilder {
     return this;
   }
 
-  withLastUpdateDaysAgo(lastUpdateDaysAgo: number) {
-    const lastUpdatedAt = new Date();
+  withLastUpdateDaysAgo(lastUpdateDaysAgo: number, now = new Date()) {
+    const lastUpdatedAt = new Date(now);
     lastUpdatedAt.setDate(lastUpdatedAt.getDate() - lastUpdateDaysAgo);
     this.userStatus.lastUpdatedAt = lastUpdatedAt;
     return this;
