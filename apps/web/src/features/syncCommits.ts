@@ -28,49 +28,74 @@ export function calculateNewUserStatus(
   currentUserStatus: UserStatus,
   now = new Date()
 ): UserStatus {
-  if (pushes.length === 0) {
-    console.log("No new commits to sync");
+  let newStatus = { ...currentUserStatus };
+  for (const push of pushes) {
+    newStatus = applyPushEvent(push, newStatus, now);
+  }
+  if (newStatus.streakExtendedAt === null) return newStatus;
+
+  const dayDifference = checkDayDifference(
+    now,
+    new Date(newStatus.streakExtendedAt)
+  );
+
+  if (dayDifference > 1) {
+    newStatus = {
+      ...newStatus,
+      lastUpdatedAt: now,
+      currentStreak: 0,
+      streakExtendedAt: now,
+    };
   }
 
-  const pushesByDay = pushes.reduce((acc, push) => {
-    const date = new Date(push.pushedAt).toDateString();
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(push);
-    return acc;
-  }, {} as Record<string, typeof pushes>);
+  return newStatus;
+}
 
-  let newStreak = currentUserStatus.currentStreak;
-  let newLongestStreak = currentUserStatus.longestStreak;
-  let streakExtendedAt = new Date(currentUserStatus?.streakExtendedAt ?? 0);
-  streakExtendedAt.setHours(0, 0, 0, 0);
-  let dateIndex = new Date(currentUserStatus.lastUpdatedAt);
-  dateIndex.setHours(0, 0, 0, 0);
-  const todayDate = new Date(now);
-  todayDate.setHours(0, 0, 0, 0);
+export function applyPushEvent(
+  push: PushEvent,
+  userStatus: UserStatus,
+  now: Date
+) {
+  const pushDate = new Date(push.pushedAt);
+  let streakExtendedAt = userStatus.streakExtendedAt || new Date(0);
+  // If push was made before the last update, we just return the current status
+  if (pushDate < streakExtendedAt) {
+    console.log("push event was made before the last update, skipping it");
+    return userStatus;
+  }
 
-  while (dateIndex <= todayDate) {
-    const date = dateIndex.toDateString();
-    const eventExists = pushesByDay[date] && pushesByDay[date].length > 0;
-    if (eventExists) {
-      newStreak++;
-      newLongestStreak = Math.max(newStreak, newLongestStreak);
-      streakExtendedAt = new Date(dateIndex);
-    }
-    // If it's today, user still has a chance to extend the streak
-    else if (dateIndex.toDateString() !== todayDate.toDateString()) {
-      newStreak = 0;
-    }
-    // set dateIndex to the next day
-    dateIndex.setDate(dateIndex.getDate() + 1);
+  const dayDifference = checkDayDifference(pushDate, streakExtendedAt);
+  if (dayDifference === 0) {
+    // We already have a push for today, no need to update the streak
+    return {
+      ...userStatus,
+      streakExtendedAt: pushDate,
+      lastUpdatedAt: now,
+    };
+  }
+
+  // If new commit is made the day after the last commit, we extend the streak
+  if (dayDifference === 1) {
+    const newStreak = userStatus.currentStreak + 1;
+    return {
+      ...userStatus,
+      lastUpdatedAt: now,
+      currentStreak: newStreak,
+      longestStreak: Math.max(newStreak, userStatus.longestStreak),
+      streakExtendedAt: pushDate,
+    };
   }
 
   return {
-    ...currentUserStatus,
+    ...userStatus,
     lastUpdatedAt: now,
-    currentStreak: newStreak,
-    longestStreak: newLongestStreak,
-    streakExtendedAt: streakExtendedAt,
+    currentStreak: 1,
+    streakExtendedAt: pushDate,
   };
+}
+
+function checkDayDifference(date1: Date, date2: Date) {
+  const dayDifference =
+    Math.abs(date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24);
+  return Math.floor(dayDifference);
 }

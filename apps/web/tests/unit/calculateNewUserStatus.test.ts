@@ -1,128 +1,72 @@
-import { calculateNewUserStatus } from "@/features/syncCommits";
+import { applyPushEvent, calculateNewUserStatus } from "@/features/syncCommits";
 import { UserStatusBuilder } from "./_testUtils/UserStatusBuilder";
 
-function toStartOfDay(date: Date) {
-  const newDate = new Date(date);
-  newDate.setHours(0, 0, 0, 0);
-  return newDate;
-}
+describe("applyPushEvent", () => {
+  it("should return the same user status if push was made before the last update", () => {
+    const now = new Date(2024, 3, 3, 11);
 
-describe("calculateNewUserStatus", () => {
-  it("should return the same user status if there are no new pushes", () => {
-    const currentUserStatus = new UserStatusBuilder().build();
-    const now = new Date();
-    const newStatus = calculateNewUserStatus([], currentUserStatus, now);
-    const expected = { ...currentUserStatus, lastUpdatedAt: now };
-    expect(newStatus).toEqual(expected);
+    const userStatus = new UserStatusBuilder(undefined, now)
+      .withStreakExtendedAt(now)
+      .build();
+    const push = {
+      pushedAt: new Date(2024, 3, 2, 10).toISOString(),
+      commitMessages: [],
+      repo: "test",
+    };
+    const newStatus = applyPushEvent(push, userStatus, now);
+    expect(newStatus).toEqual(userStatus);
   });
 
-  it("should NOT reset streak if there are no pushes today", () => {
-    const currentUserStatus = new UserStatusBuilder()
+  it("should increment the streak if push was made the day after the last push", () => {
+    const now = new Date(2024, 3, 3, 11);
+
+    const userStatus = new UserStatusBuilder(undefined, now)
+      .withLastUpdateDaysAgo(1)
+      .withStreakExtendedAt(new Date(2024, 3, 2, 8))
       .withCurrentStreak(1)
       .withLongestStreak(1)
       .build();
-    const now = new Date();
-    const newStatus = calculateNewUserStatus([], currentUserStatus, now);
+
+    const push = {
+      pushedAt: new Date(2024, 3, 3, 10).toISOString(),
+      commitMessages: [],
+      repo: "test",
+    };
+
+    const newStatus = applyPushEvent(push, userStatus, now);
     const expected = {
-      ...currentUserStatus,
+      ...userStatus,
+      lastUpdatedAt: now,
+      currentStreak: 2,
+      longestStreak: 2,
+      streakExtendedAt: new Date(push.pushedAt),
+    };
+    expect(newStatus).toEqual(expected);
+  });
+
+  it("should NOT increment the streak if push was made the same day as the last push", () => {
+    const now = new Date(2024, 3, 3, 11);
+
+    const userStatus = new UserStatusBuilder(undefined, now)
+      .withLastUpdateDaysAgo(1)
+      .withStreakExtendedAt(new Date(2024, 3, 3, 8))
+      .withCurrentStreak(1)
+      .withLongestStreak(1)
+      .build();
+
+    const push = {
+      pushedAt: new Date(2024, 3, 3, 10).toISOString(),
+      commitMessages: [],
+      repo: "test",
+    };
+
+    const newStatus = applyPushEvent(push, userStatus, now);
+    const expected = {
+      ...userStatus,
       lastUpdatedAt: now,
       currentStreak: 1,
-    };
-    expect(newStatus).toEqual(expected);
-  });
-
-  it("should reset streak if there were no pushes since yesterday", () => {
-    const currentUserStatus = new UserStatusBuilder()
-      .withCurrentStreak(1)
-      .withLongestStreak(1)
-      .withLastUpdateDaysAgo(1)
-      .build();
-    const now = new Date();
-    const newStatus = calculateNewUserStatus([], currentUserStatus, now);
-    const expected = {
-      ...currentUserStatus,
-      lastUpdatedAt: now,
-      currentStreak: 0,
-    };
-    expect(newStatus).toEqual(expected);
-  });
-
-  it("should increment streak if there were pushes today", () => {
-    const now = new Date(2024, 3, 3, 11);
-    const pushedAt = new Date(2024, 3, 3, 10); // pushed 1 hour before now
-
-    const currentUserStatus = new UserStatusBuilder(undefined, now)
-      .withCurrentStreak(1)
-      .withLongestStreak(1)
-      .withLastUpdateDaysAgo(0)
-      .build();
-    const newStatus = calculateNewUserStatus(
-      [{ pushedAt: pushedAt.toISOString(), commitMessages: [], repo: "test" }],
-      currentUserStatus,
-      now
-    );
-    const expected = {
-      ...currentUserStatus,
-      lastUpdatedAt: now,
-      currentStreak: 2,
-      longestStreak: 2,
-      streakExtendedAt: toStartOfDay(pushedAt),
-    };
-    expect(newStatus).toEqual(expected);
-  });
-
-  it("If I have two new pushes day after day, the streak should be extended by 2", () => {
-    const now = new Date(2024, 3, 3, 11);
-    const pushedAt = new Date(2024, 3, 2, 10); // pushed 1 day before now
-    const pushedAt2 = new Date(2024, 3, 1, 10); // pushed 2 day before now
-
-    const currentUserStatus = new UserStatusBuilder(undefined, now)
-      .withCurrentStreak(1)
-      .withLongestStreak(1)
-      .withLastUpdateDaysAgo(2)
-      .build();
-    const newStatus = calculateNewUserStatus(
-      [
-        { pushedAt: pushedAt2.toISOString(), commitMessages: [], repo: "test" },
-        { pushedAt: pushedAt.toISOString(), commitMessages: [], repo: "test" },
-      ],
-      currentUserStatus,
-      now
-    );
-    const expected = {
-      ...currentUserStatus,
-      lastUpdatedAt: now,
-      currentStreak: 3,
-      longestStreak: 3,
-      streakExtendedAt: toStartOfDay(pushedAt),
-    };
-    expect(newStatus).toEqual(expected);
-  });
-
-  it("Should only extend the streak by 1 if there were 2 pushes at the same day", () => {
-    const now = new Date(2024, 3, 3, 11);
-    const pushedAt = new Date(2024, 3, 2, 10); // pushed 1 day before now
-    const pushedAt2 = new Date(2024, 3, 2, 8); // also pushed 1 day before now
-
-    const currentUserStatus = new UserStatusBuilder(undefined, now)
-      .withCurrentStreak(1)
-      .withLongestStreak(1)
-      .withLastUpdateDaysAgo(1)
-      .build();
-    const newStatus = calculateNewUserStatus(
-      [
-        { pushedAt: pushedAt2.toISOString(), commitMessages: [], repo: "test" },
-        { pushedAt: pushedAt.toISOString(), commitMessages: [], repo: "test" },
-      ],
-      currentUserStatus,
-      now
-    );
-    const expected = {
-      ...currentUserStatus,
-      lastUpdatedAt: now,
-      currentStreak: 2,
-      longestStreak: 2,
-      streakExtendedAt: toStartOfDay(pushedAt),
+      longestStreak: 1,
+      streakExtendedAt: new Date(push.pushedAt),
     };
     expect(newStatus).toEqual(expected);
   });

@@ -5,15 +5,12 @@ type UserStatus = typeof userStatuses.$inferSelect;
 export class UserStatusBuilder {
   private userStatus: UserStatus;
   private getDefaultUserStatus(): UserStatus {
-    const extendedDate = new Date(this.now);
-    extendedDate.setHours(0, 0, 0, 0); // extended date should alaways be at midnight
-
     return {
       userId: 1,
       xp: 0,
       currentStreak: 0,
       longestStreak: 0,
-      streakExtendedAt: extendedDate,
+      streakExtendedAt: null,
       lastUpdatedAt: new Date(this.now),
     };
   }
@@ -39,6 +36,11 @@ export class UserStatusBuilder {
     const lastUpdatedAt = new Date(this.now);
     lastUpdatedAt.setDate(lastUpdatedAt.getDate() - lastUpdateDaysAgo);
     this.userStatus.lastUpdatedAt = lastUpdatedAt;
+    return this;
+  }
+
+  withStreakExtendedAt(streakExtendedAt: Date) {
+    this.userStatus.streakExtendedAt = streakExtendedAt;
     return this;
   }
 
