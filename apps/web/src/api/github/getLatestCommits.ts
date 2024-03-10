@@ -26,7 +26,10 @@ export async function getLatestCommits(
       repo: event.repo.name,
       pushedAt: event.created_at,
     }))
-    .filter((commit) => commit.commitMessages.length > 0); // only include events with commits
+    .filter((commit) => commit.commitMessages.length > 0) // only include events with commits
+    .toSorted(
+      (a, b) => new Date(a.pushedAt).getTime() - new Date(b.pushedAt).getTime()
+    );
   return commits;
 }
 
