@@ -96,12 +96,22 @@ export function applyPushEvent(
     ...userStatus,
     lastUpdatedAt: now,
     currentStreak: 1,
+    longestStreak: Math.max(1, userStatus.longestStreak),
     streakExtendedAt: pushDate,
   };
 }
 
 function checkDayDifference(date1: Date, date2: Date) {
-  const dayDifference =
-    Math.abs(date1.getTime() - date2.getTime()) / (1000 * 60 * 60 * 24);
-  return Math.floor(dayDifference);
+  // Create new Date instances to avoid modifying the original dates
+  const firstDate = new Date(date1);
+  const secondDate = new Date(date2);
+
+  // Set both dates to midnight to ignore the time part
+  firstDate.setHours(0, 0, 0, 0);
+  secondDate.setHours(0, 0, 0, 0);
+
+  const diffTime = Math.abs(secondDate.getTime() - firstDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
 }
