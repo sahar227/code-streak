@@ -1,6 +1,7 @@
 import { PushEvent, getLatestCommits } from "@/api/github/getLatestCommits";
 import { db } from "@/db";
 import { githubProfiles, userStatuses } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 type UserStatus = typeof userStatuses.$inferSelect;
 type GithubProfile = typeof githubProfiles.$inferSelect;
@@ -20,7 +21,10 @@ export const syncCommits = async (
 
   const newStatus = calculateNewUserStatus(newPushes, userStatus);
 
-  await db().update(userStatuses).set(newStatus);
+  await db()
+    .update(userStatuses)
+    .set(newStatus)
+    .where(eq(userStatuses.userId, userStatus.userId));
 };
 
 export function calculateNewUserStatus(
