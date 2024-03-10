@@ -27,7 +27,7 @@ export const getUser = async (
 
   const updatedStatus = await syncCommits(
     tokenData.githubAuthToken,
-    dbUser.githubProfile,
+    dbUser.name,
     dbUser.userStatus
   );
 
