@@ -63,7 +63,7 @@ export async function authWithGithubCode(
   } catch (error) {
     console.error(error);
     return {
-      error: "Unexpected error when tryinh to authenticate with Github",
+      error: "Unexpected error when trying to authenticate with Github",
       isSuccess: false,
     };
   }
