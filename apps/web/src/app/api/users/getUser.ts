@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { UserResponse } from "contracts";
+import { syncCommits } from "@/features/syncCommits";
 const tokenContentSchema = z.object({
   userId: z.number(),
   githubAuthToken: z.string(),
@@ -19,16 +20,22 @@ export const getUser = async (
   const tokenData = decriptJwt(token);
   const dbUser = await db().query.users.findFirst({
     where: eq(users.id, tokenData.userId),
-    with: { userStatus: true },
+    with: { userStatus: true, githubProfile: true },
   });
 
   if (!dbUser) return undefined;
 
+  const updatedStatus = await syncCommits(
+    tokenData.githubAuthToken,
+    dbUser.githubProfile,
+    dbUser.userStatus
+  );
+
   const user = {
     name: dbUser.name,
-    currentStreak: dbUser.userStatus.currentStreak,
-    longestStreak: dbUser.userStatus.longestStreak,
-    xp: dbUser.userStatus.xp,
+    currentStreak: updatedStatus.currentStreak,
+    longestStreak: updatedStatus.longestStreak,
+    xp: updatedStatus.xp,
   } satisfies UserResponse;
   return user;
 };

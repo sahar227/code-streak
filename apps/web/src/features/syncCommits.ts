@@ -25,6 +25,8 @@ export const syncCommits = async (
     .update(userStatuses)
     .set(newStatus)
     .where(eq(userStatuses.userId, userStatus.userId));
+
+  return newStatus;
 };
 
 export function calculateNewUserStatus(
