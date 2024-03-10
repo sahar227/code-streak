@@ -52,6 +52,7 @@ export async function authWithGithubCode(
       githubUserId: githubUser.id.toString(),
       userId: user.id,
       reposUrl: githubUser.repos_url,
+      login: githubUser.login,
     });
 
     await db().insert(userStatuses).values({

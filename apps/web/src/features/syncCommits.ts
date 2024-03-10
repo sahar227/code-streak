@@ -8,12 +8,12 @@ type GithubProfile = typeof githubProfiles.$inferSelect;
 
 export const syncCommits = async (
   githubAuthToken: string,
-  gitHubLogin: string,
+  githunProfile: GithubProfile,
   userStatus: UserStatus
 ) => {
   const newPushes = await getLatestCommits(
     githubAuthToken,
-    gitHubLogin,
+    githunProfile.login,
     userStatus.lastUpdatedAt
   );
 

@@ -32,10 +32,12 @@ export const githubProfiles = pgTable(
       .references(() => users.id),
     githubUserId: varchar("github_user_id", { length: 255 }).notNull(),
     reposUrl: varchar("repos_url", { length: 255 }),
+    login: varchar("login", { length: 255 }).notNull(),
   },
   (table) => ({
     uniqueGithubUserId: unique("github_user_id_unique").on(table.githubUserId),
     uniqueReposUrl: unique("repos_url_unique").on(table.reposUrl),
+    uniqueLogin: unique("login_unique").on(table.login),
   })
 );
 

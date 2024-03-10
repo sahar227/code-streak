@@ -43,6 +43,13 @@
       "when": 1709181002162,
       "tag": "0005_dashing_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1710051364999,
+      "tag": "0006_parallel_karnak",
+      "breakpoints": true
     }
   ]
 }
